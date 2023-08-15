@@ -37,16 +37,41 @@ for i=1:length(pz)-2
     end
 end
 
-px=ones(length(pz),1);
-px=px.*799.013;
+px=zeros(length(pz),1);
 py=transpose(py);
 pz=transpose(pz);
-py=py.*1000;
-pz=pz.*1000;
-pz=pz+zeros(length(pz),1).*1005.694;
-a=ones(length(pz),1)*180;
-b=ones(length(pz),1).*-89.993;
-c=zeros(length(pz),1);
+% Interpolation parameters
+stepper = 1; % Number of interpolated points between each pair of points
+multiplier = 1000; % Multiplier
+
+% Initialize arrays to store interpolated points
+interpolated_px = [];
+interpolated_py = [];
+interpolated_pz = [];
+
+% Linearly interpolate points
+for i = 1:length(px)-1
+    for j = 0:stepper
+        t = j / stepper; % Interpolation parameter
+        interpolated_px(end+1) = px(i) + t * (px(i+1) - px(i));
+        interpolated_py(end+1) = py(i) + t * (py(i+1) - py(i));
+        interpolated_pz(end+1) = pz(i) + t * (pz(i+1) - pz(i));
+    end
+end
+
+% Scale the interpolated points
+interpolated_px = interpolated_px * multiplier;
+interpolated_py = interpolated_py * multiplier;
+interpolated_pz = interpolated_pz * multiplier;
+
+p=[interpolated_px',interpolated_py',-1*interpolated_pz',zeros(length(interpolated_pz),3)];
+
+% Save the variable 'p' to a .csv file
+csv_filename = 'output_points.csv';  % Replace with the desired file name
+
+% Use writematrix to save the data to a .csv file
+writematrix(p, csv_filename);
+
 function plot_points(px, py)
     plot(px, py, 'b-o');
     axis equal;
